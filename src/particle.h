@@ -11,6 +11,7 @@ private:
     float stepSize;
     int id;
     bool alive;
+    Particle* parent;
 
 public:
     Particle();

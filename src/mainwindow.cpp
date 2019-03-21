@@ -581,6 +581,7 @@ void MainWindow::joint_transformation_textEdit_update(Joint* joint) {
 void MainWindow::slot_setTime(int t) {
     ui->mygl->branch.setTime(t);
     ui->mygl->updateBranch(&ui->mygl->branch);
+    std::cout << "alive number: " << ui->mygl->branch.numAlive() << std::endl;
     std::cout << "size: " << ui->mygl->branch.getParticles().size() << std::endl;
     std::cout << "--------------------" << std::endl;
     ui->mygl->setFocus();

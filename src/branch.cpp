@@ -28,42 +28,6 @@ void Branch::setWb(float i) { wb = i; }
 
 void Branch::setWh(float i) { wh = i; }
 
-void Branch::createBranch(BRANCHTYPE bt) {
-    m_paths.clear();
-    switch (bt) {
-    case UMBEL:
-    {
-        int floretNum = m_florets.size();
-        for (int i = 0; i < floretNum; i++) {
-            Path path;
-            path.pos.push_back(base);
-            path.color.push_back(glm::vec3(0,1,0));
-//            path.push_back((base + m_florets[i]) / 2.f);
-            path.pos.push_back(m_Particles[i].getPos());
-            path.color.push_back(getParticleColor(m_Particles[i]));
-            m_paths.push_back(path);
-        }
-        break;
-    }
-
-    case MONOPODIAL:
-    {
-        //todo
-        break;
-    }
-
-    case SYMPODIAL:
-    {
-        // todo
-        break;
-    }
-
-    default:
-        break;
-    }
-
-}
-
 void Branch::setFloretTest(int num, float radius) {
     Sampler sampler;
     sampler.thetaMax = 120.f;
@@ -123,26 +87,38 @@ void Branch::resetParticle() {
     m_paths.clear();
 }
 
-void Branch::mergeParticles(Particle p1, Particle p2) {
-    int size = m_Particles.size();
-    Particle p(particleID++);
-    float energy1 = p1.getEnergy();
-    float energy2 = p2.getEnergy();
-    p.setEnergy(energy1 + energy2);
-    glm::vec3 pos1 = p1.getPos();
-    glm::vec3 pos2 = p2.getPos();
-    p.setPos((pos1 + pos2) / 2.f);
-    p.setDir(base - p.getPos());
-    p.setStepSize(p1.getStepSize());
+void Branch::mergeParticles(Particle &p1, Particle &p2, int &newsize) {
+    if (p1.isAlive() && p2.isAlive()) {
+        int size = m_Particles.size();
+        Particle p(particleID++);
+        float energy1 = p1.getEnergy();
+        float energy2 = p2.getEnergy();
+        p.setEnergy(energy1 + energy2);
+        glm::vec3 pos1 = p1.getPos();
+        glm::vec3 pos2 = p2.getPos();
+        p.setPos((pos1 + pos2) / 2.f);
+        p.setDir(base - p.getPos());
+        p.setStepSize(p1.getStepSize());
 
-    for (int i = size - 1; i >= 0; i--) {
-        if (m_Particles[i].getID() == p1.getID() ||
-            m_Particles[i].getID() == p2.getID())
-        {
-            m_Particles.erase(m_Particles.begin() + i);
+        for (int i = size - 1; i >= 0; i--) {
+            if (m_Particles[i].getID() == p1.getID() ||
+                m_Particles[i].getID() == p2.getID())
+            {
+                m_Particles.erase(m_Particles.begin() + i);
+            }
         }
+        m_Particles.push_back(p);
+        newsize--;
     }
-    m_Particles.push_back(p);
+    else if (p1.isAlive()) {
+        p1.setAlive(false);
+        p1.setPos(p2.getPos());
+    }
+    else if (p2.isAlive()) {
+        p2.setAlive(false);
+        p2.setPos(p1.getPos());
+    }
+
 }
 
 void Branch::addFloret(glm::vec3 pos) { m_florets.push_back(pos); }
@@ -153,8 +129,9 @@ void Branch::updateBranchNewMethod() {
     float tolorance = 0.05;
     int size = m_Particles.size();
     for (int i = 0; i < size; i++) {
+        if (!m_Particles[i].isAlive()) continue;
         if (glm::distance(base, m_Particles[i].getPos()) < 0.1) {
-            m_Particles.erase(m_Particles.begin()+i);
+            m_Particles[i].setAlive(false);
             continue;
         }
         Particle nearestParticle(-2);
@@ -166,15 +143,11 @@ void Branch::updateBranchNewMethod() {
         if (findNearestParticle(m_Particles[i], &nearestParticle)) {
             float dis = glm::distance(m_Particles[i].getPos(), nearestParticle.getPos());
             if (dis < tolorance) {
-                mergeParticles(m_Particles[i], nearestParticle);
-                size--;
+                mergeParticles(m_Particles[i], nearestParticle, size);
                 continue;
             }
             else {
                 glm::vec3 particleDir = glm::normalize(nearestParticle.getPos() - oldPos);
-//                if (glm::dot(particleDir, baseDir) <= 0) {
-//                    particleDir = glm::vec3(0.f);
-//                }
                 newDir = (1.f / (wa + wb + wh) ) *
                         (wb * particleDir + wa * baseDir + wh * oldDir);
                 m_Particles[i].setDir(newDir);
@@ -185,14 +158,20 @@ void Branch::updateBranchNewMethod() {
             m_Particles[i].setDir(newDir);
         }
         glm::vec3 newPos = stepSize * newDir + oldPos;
+        Particle newParticle(particleID++);
+        newParticle.setPos(newPos);
+        newParticle.setDir(newDir);
+        newParticle.setEnergy(m_Particles[i].getEnergy());
+        newParticle.setStepSize(m_Particles[i].getStepSize());
+        m_Particles[i].setAlive(false);
+        m_Particles.push_back(newParticle);
         Path path;
         path.pos.push_back(oldPos);
         path.pos.push_back(newPos);
         path.color.push_back(getParticleColor(m_Particles[i]));
-        path.color.push_back(getParticleColor(m_Particles[i]));
+        path.color.push_back(getParticleColor(newParticle));
         m_paths.push_back(path);
-        m_Particles[i].setPos(newPos);
-        m_Particles[i].setDir(newDir);
+
     }
 
 }
@@ -200,4 +179,14 @@ void Branch::updateBranchNewMethod() {
 glm::vec3 Branch::getParticleColor(Particle particle) {
     float weight = 0.5f + particle.getEnergy() * 0.1f;
     return glm::vec3(0,weight,0);
+}
+
+int Branch::numAlive() {
+    int sum = 0;
+    int size = m_Particles.size();
+    for (int i = 0; i < size; i++) {
+        if (m_Particles[i].isAlive())
+            sum++;
+    }
+    return sum;
 }

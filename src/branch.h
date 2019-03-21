@@ -44,17 +44,17 @@ public:
     void setWh(float i);
 
     void createTestScene();
-    void createBranch(BRANCHTYPE bt);
     void createBranchTimeNewMethod();
     void setFloretTest (int num, float radius);
     bool findNearestParticle (Particle particle, Particle *nearestPaticle);
     void resetParticle();
-    void mergeParticles(Particle p1, Particle p2);
+    void mergeParticles(Particle &p1, Particle &p2, int &size);
     void addParticle(Particle p);
     void addFloret(glm::vec3 pos);
     void updateBranchNewMethod();
     glm::vec3 getParticleColor(Particle particle);
     void setTime(int t);
+    int numAlive();
 };
 
 #endif // BRANCH_H

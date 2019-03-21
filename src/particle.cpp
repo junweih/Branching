@@ -2,11 +2,12 @@
 
 Particle::Particle()
     : pos(glm::vec3(0,0,0)), dir(glm::vec3(0,0,0)), energy(1.f), stepSize(0.5f), id(-1),
-      alive(true)
+      alive(true), parent(nullptr)
 {}
 
 Particle::Particle(int id)
-    : pos(glm::vec3(0,0,0)), dir(glm::vec3(0,0,0)), energy(1.f), stepSize(0.5f), id(id)
+    : pos(glm::vec3(0,0,0)), dir(glm::vec3(0,0,0)), energy(1.f), stepSize(0.5f), id(id),
+      alive(true), parent(nullptr)
 {}
 
 glm::vec3 Particle::getPos() { return pos; }
