@@ -1,0 +1,116 @@
+10-21 15:00
+Change color in shaderprogram
+if (attrCol != -1 && d.bindCol()) {
+    context->glEnableVertexAttribArray(attrCol);
+    context->glVertexAttribPointer(attrCol, 4, GL_FLOAT, false, 0, NULL);
+}
+
+10-21 15:30
+When we emit a signal, we should let it Q_OBJECT
+
+Also Qmake
+
+10-21 16:40
+When we do line mesh and transfer the data, I forget to size = size*2
+
+10-22 17:47
+when we set qlist widget item, we use function, setCurrentItem();
+the halfedge is the subclass of qlistwidget
+
+10-22 18:53
+shift + H
+e->key() == Qt::Key_H) && (e->modifiers() == Qt::ShiftModifier)
+
+10-28 20:24
+map
+https://thispointer.com/stdmap-tutorial-part-1-usage-detail-with-examples/
+
+10-30 00:11
+ui->mygl->subdivision();
+ui->mygl->geom_mesh.destroy();
+ui->mygl->geom_mesh.create();
+
+because no setfocus, it will not run geom_mesh.destroy();
+
+10-31 02:47
+qfiledialog
+http://doc.qt.io/qt-5/qtwidgets-tutorials-addressbook-part6-example.html
+
+10-31 22:52
+pair
+string s1 = "a";
+string s2 = "b";
+int a1 = 1;
+int a2 = 2;
+map<int, string> map1;
+map1.insert(make_pair(a1, s1));
+map1.insert(make_pair(a2, s2));
+
+map<int, pair<string, string>> map3;
+map3.insert(std::make_pair(1, std::pair <string, string> (s1, s2)));
+cout << map3[1].first << " " << map3[1].second << endl;
+
+map<pair<string, string>, int> map4;
+map4.insert(std::make_pair(std::pair <string, string> (s1, s2),1));
+cout << map4[std::pair <string, string> (s1, s2)] << endl;
+
+11-5
+1.
+bind matrix (world -> local)
+getOverallT (local -> world)
+getlocalT (local ->world)
+
+A) bind T(-2,-2)
+    OT = LT = T(2,2)
+
+B) bind T: R(-90) T(-2,-2)
+    OT = LT = T(2,2) R(90)
+
+2.c
+A.OT * A.Bind * v * 2/3 + B.OT * B.Bind * v * 1/3
+
+11-6
+qjsonobject
+http://doc.qt.io/qt-5/qjsonobject.html
+https://stackoverflow.com/questions/19822211/qt-parsing-json-using-qjsondocument-qjsonobject-qjsonarray
+
+11-7
+get all items in qlistwidget
+https://stackoverflow.com/questions/12222594/how-can-i-iterate-through-qlistwidget-items-and-work-with-each-item
+
+11-7
+when I load mesh and json together, I find the mesh is twice as big as joint.
+The reason is the setmodel in paintGL, the mesh's model is
+glm::mat4 model = glm::translate(glm::mat4(2.0f), glm::vec3(0,0,0))
+* glm::scale(glm::mat4(1.0f), glm::vec3(2,2,2));
+it scales double
+
+11-8
+1. how to type degree symbol
+PC. Hold down the Alt key and on the numeric keypad on the right of the keyboard, type 0176 or Alt+ 248.
+Mac. Press Option Shift 8.
+iOS. From the iOS keyboard on your iPhone or iPad:
+Android. Switch to the numbers and symbols keyboard and press the ALT key. The degrees symbol is on the second row.
+
+2. textEdit
+ui->joint_Transfomation_textEdit->clear();
+QString q1 = "Name: " + joint->name;
+ui->joint_Transfomation_textEdit->append(q1);
+QString q2 = "Position:   x: " + QString::number(joint->position.x )  +
+        "     y: " + QString::number(joint->position.y) +
+        "     z: " + QString::number(joint->position.z);
+ui->joint_Transfomation_textEdit->append(q2);
+QString q3 = "Rotation:   x: " + QString::number(glm::eulerAngles(joint->rotation).x * 180 / M_PI)  +
+        "°     y: " + QString::number(glm::eulerAngles(joint->rotation).y * 180 / M_PI) +
+        "°     z: " + QString::number(glm::eulerAngles(joint->rotation).z * 180 / M_PI) + "°";
+ui->joint_Transfomation_textEdit->append(q3);
+
+3. bind mesh
+The order of the vbo of weights and jointID is wrong at the first time.
+Because I tranfer them as vertices order.
+eg:
+for (Vertex* v : m_vertices) {
+    mesh_jointID.push_back(...)
+}
+actually, I should mesh_jointID push back as the order of the face loop,
+for each vertex of face
