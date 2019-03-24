@@ -48,19 +48,26 @@ void LineMesh::create()
     mp_context->glBufferData(GL_ARRAY_BUFFER, size*2 * sizeof(glm::vec4), lne_vert_col.data(), GL_STATIC_DRAW);
 }
 
-void LineMesh::createPath1(Branch branch) {
+glm::vec3 energyToColor(float energy) {
+    float weight = 0.5f + energy * 0.1f;
+    return glm::vec3(0,weight,0);
+}
+
+void LineMesh::createBranch(Branch branch) {
     int size = 0;
     int n = 0;
     for (int i = 0; i < branch.getPaths().size(); i++) {
 
         Path path = branch.getPaths()[i];
-        for (int j = 0; j < path.pos.size() -1; j++) {
-            lne_vert_pos.push_back(glm::vec4(path.pos[j], 1));
-            lne_vert_col.push_back(glm::vec4(path.color[j],1));
+        for (int j = 0; j < path.seg.size(); j++) {
+            lne_vert_pos.push_back(glm::vec4(path.seg[j].start, 1));
+            glm::vec3 color1 = energyToColor(path.energy);
+            lne_vert_col.push_back(glm::vec4(color1,1));
             lne_idx.push_back(n++);
 
-            lne_vert_pos.push_back(glm::vec4(path.pos[j+1], 1));
-            lne_vert_col.push_back(glm::vec4(path.pos[j+1],1));
+            lne_vert_pos.push_back(glm::vec4(path.seg[j].end, 1));
+            glm::vec3 color2 = energyToColor(path.energy);
+            lne_vert_col.push_back(glm::vec4(color2,1));
             lne_idx.push_back(n++);
             size++;
         }
@@ -85,13 +92,15 @@ void LineMesh::createPath1(Branch branch) {
 void LineMesh::createPath(Path path) {
     int size = 0;
     int n = 0;
-    for (int j = 0; j < path.pos.size() -1; j++) {
-        lne_vert_pos.push_back(glm::vec4(path.pos[j], 1));
-        lne_vert_col.push_back(glm::vec4(path.color[j],1));
+    for (int j = 0; j < path.seg.size(); j++) {
+        lne_vert_pos.push_back(glm::vec4(path.seg[j].start, 1));
+        glm::vec3 color1 = energyToColor(path.energy);
+        lne_vert_col.push_back(glm::vec4(color1,1));
         lne_idx.push_back(n++);
 
-        lne_vert_pos.push_back(glm::vec4(path.pos[j+1], 1));
-        lne_vert_col.push_back(glm::vec4(path.color[j+1],1));
+        lne_vert_pos.push_back(glm::vec4(path.seg[j].end, 1));
+        glm::vec3 color2 = energyToColor(path.energy);
+        lne_vert_col.push_back(glm::vec4(color2,1));
         lne_idx.push_back(n++);
         size++;
     }

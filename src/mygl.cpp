@@ -71,12 +71,55 @@ void MyGL::initializeGL()
 //    branch.addParticle(p1);
 //    branch.addParticle(p2);
 
+    glm::vec3 basePos (0,0,0);
+    Path p2;
+
+    for (int i = 0; i < 5; i++) {
+//        glm::vec3 pos (i-3, glm::sqrt((float)i)+2, 0);
+        glm::vec3 pos (i, glm::pow((float)(i-1), 1.5f) - 3, 0);
+        appendPath(p2, pos, 10.f);
+    }
+
+    Path p3;
+    branch.pushBackPath(p3);
+    for (int i = -5; i < 0; i++) {
+        glm::vec3 pos (i+2.5, 3, 0);
+//        appendPath(p3, pos, 1.f);
+        branch.updatePath(p3, pos, 1.f);
+    }
+    Path p1;
+    Particle base(0, basePos, p1);
+    base.setEnergy(2.f);
+    Particle pIsect;
+
+    glm::vec3 isect;
+    float dis;
+    Path tmpPath;
+    int tmpSeg;
+
+//    branch.pushBackPath(p2);
 
 
-    branch.setFloretTest(49, 4.5f);
+    if (branch.findNearestParticle(base, pIsect, tmpPath, tmpSeg)) {
+        appendPath(p1, base.getPos(), base.getEnergy());
+        appendPath(p1, pIsect.getPos(), base.getEnergy());
+        Path newPath;
+        branch.splitPath(pIsect, tmpPath, newPath, tmpSeg);
+        branch.pushBackPath(newPath);
+    }
+//    branch.mergeParticles(base, pIsect, 10);
+    branch.pushBackPath(p1);
+    appendPath(p1, basePos, 1.f);
+    appendPath(p1, isect, 1.f);
 
-    branch.setFloretTest(33, 3.5f);
-    branch.setFloretTest(19, 2.f);
+
+
+
+//    branch.setFloretTest(1, 2.f);
+//    branch.setFloretTest(49, 4.5f);
+
+//    branch.setFloretTest(33, 3.5f);
+//    branch.setFloretTest(19, 2.f);
 //    branch.createBranch(UMBEL);
     time = 0;
     branch.setStepSize(0.1f);
@@ -87,10 +130,6 @@ void MyGL::initializeGL()
         pathLine->createPath(p);
         m_selectedLineMesh.push_back(pathLine);
     }
-//    LineMesh* pathLine = new LineMesh(this);
-//    pathLine->createPath(branch);
-//    m_selectedLineMesh.push_back(pathLine);
-
     // base
     Sphere* baseSphere = new Sphere(this);
     baseSphere->createSphere(branch.getBasePos(), 0.5, glm::vec4(0,0,1,1));

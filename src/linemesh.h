@@ -11,7 +11,7 @@ public:
     LineMesh(GLWidget277 *context);
     ~LineMesh();
     void create();
-    void createPath1(Branch branch);
+    void createBranch(Branch branch);
     void createPath(Path path);
     GLenum drawMode() override;
     std::vector<GLuint> lne_idx;

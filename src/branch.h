@@ -5,11 +5,6 @@
 #include "warpfunctions.h"
 #include "particle.h"
 
-struct Path {
-    std::vector<glm::vec3> pos;
-    std::vector<glm::vec3> color;
-};
-
 enum BRANCHTYPE : unsigned char
 {
     UMBEL, MONOPODIAL, SYMPODIAL
@@ -46,15 +41,24 @@ public:
     void createTestScene();
     void createBranchTimeNewMethod();
     void setFloretTest (int num, float radius);
-    bool findNearestParticle (Particle particle, Particle *nearestPaticle);
+    bool findNearestParticle (Particle particle, Particle &nearestPaticle, Path &nearestPath,
+                              int &segmentNum);
     void resetParticle();
-    void mergeParticles(Particle &p1, Particle &p2, int &size);
-    void addParticle(Particle p);
+    void mergeParticles(Particle &p1, Particle &p2, int &size, int segNum);
     void addFloret(glm::vec3 pos);
     void updateBranchNewMethod();
     glm::vec3 getParticleColor(Particle particle);
     void setTime(int t);
     int numAlive();
+    bool findNearestPathPos(glm::vec3 pos, Path p, glm::vec3 &isect, float &dis, int &segNum);
+    // distance of point and segment, return intersection isect
+    float disPosSeg(glm::vec3 pt, glm::vec3 begin, glm::vec3 end, glm::vec3 &isect);
+    void pushBackPath(Path p);
+    void splitPath(Particle particle, Path &oldPath, Path &newPath, int segmentNum);
+    bool inPath (Particle particle, Path path);
+    void changePathPos(Particle particle, glm::vec3 pos);
+    void erasePath(Path path);
+    void updatePath(Path p, glm::vec3 pos, float energy);
 };
 
 #endif // BRANCH_H
